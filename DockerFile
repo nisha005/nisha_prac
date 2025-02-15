@@ -1,12 +1,21 @@
-FROM nginx:alpine  # Use a lightweight Nginx image
+FROM nginx:alpine
 
 WORKDIR /usr/share/nginx/html
 
-# Clone the repository (using a multi-stage build for efficiency)
-COPY --from=alpine/git:latest /usr/bin/git /usr/bin/git
-RUN git clone https://github.com/nisha005/nisha_prac.git .
+# Install Git and SSH
+RUN apk add --no-cache git openssh-client
 
-# OR (simpler, but less efficient for larger repos)
-# COPY . .  # If your files are already in your build context
+# Add SSH key (best practice: use build arguments and secrets)
+ARG SSH_PRIVATE_KEY
+RUN mkdir -p ~/.ssh && \
+    echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa && \
+    chmod 600 ~/.ssh/id_rsa && \
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+# Clone the repository
+RUN git clone git@github.com:nisha005/nisha_prac.git .
+
+# Remove SSH key for security (very important!)
+RUN rm -rf ~/.ssh/*
 
 EXPOSE 80
