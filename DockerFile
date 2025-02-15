@@ -1,12 +1,5 @@
-FROM nginx:alpine  # Use a lightweight Nginx image
+FROM nginx:alpine
 
-WORKDIR /usr/share/nginx/html
-
-# Clone the repository (using a multi-stage build for efficiency)
-COPY --from=alpine/git:latest /usr/bin/git /usr/bin/git
-RUN git clone https://github.com/nisha005/nisha_prac.git .
-
-# OR (simpler, but less efficient for larger repos)
-# COPY . .  # If your files are already in your build context
+COPY . /usr/share/nginx/html
 
 EXPOSE 80
